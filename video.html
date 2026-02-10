@@ -133,10 +133,11 @@
         </div>
         
         <video id="mainVideo" controls autoplay playsinline>
-            <!-- ИСПРАВЛЕНО: Используем ваш видеофайл your-video.mp4 -->
+            <!-- Замените 'your-video.mp4' на имя вашего видеофайла -->
             <source src="your-video.mp4" type="video/mp4">
-            <source src="your-video.webm" type="video/webm">
-            <source src="your-video.ogg" type="video/ogg">
+            <!-- Можно добавить альтернативные форматы для лучшей совместимости -->
+            <!-- <source src="your-video.webm" type="video/webm"> -->
+            <!-- <source src="your-video.ogg" type="video/ogg"> -->
             Ваш браузер не поддерживает видео тег. 
             <a href="your-video.mp4" download>Скачайте видео</a>
         </video>
@@ -172,7 +173,8 @@
                 <i class="fas fa-exclamation-triangle"></i>
                 <h3>Ошибка загрузки видео</h3>
                 <p>Файл your-video.mp4 не найден или не может быть воспроизведен.</p>
-                <p>Убедитесь, что файл video.mp4 находится в той же папке, что и эта страница.</p>
+                <p>Убедитесь, что файл your-video.mp4 находится в той же папке, что и эта страница.</p>
+                <p>Или измените имя файла в атрибуте src тега video на ваше видео.</p>
                 <p>Код ошибки: ${video.error ? video.error.code : 'неизвестно'}</p>
                 <button onclick="location.reload()" class="back-btn" style="background: #6366f1; margin-top: 10px;">
                     <i class="fas fa-sync-alt"></i> Перезагрузить страницу
@@ -202,6 +204,7 @@
         
         function resetAccess() {
             localStorage.removeItem('accessGranted');
+            localStorage.removeItem('permanentAccessGranted');
             window.location.href = 'index.html';
         }
         
@@ -214,9 +217,10 @@
         // Проверяем, был ли предоставлен доступ
         window.addEventListener('load', function() {
             const accessGranted = localStorage.getItem('accessGranted');
+            const permanentAccess = localStorage.getItem('permanentAccessGranted');
             
-            if (accessGranted !== 'true') {
-                // Если доступ не был предоставлен, перенаправляем на главную
+            // Если ни один из доступов не предоставлен, перенаправляем на главную
+            if (accessGranted !== 'true' && permanentAccess !== 'true') {
                 setTimeout(function() {
                     window.location.href = 'index.html';
                 }, 2000);
