@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -164,6 +165,30 @@
             border: 2px solid #10b981;
         }
 
+        .access-button {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto 0;
+            padding: 15px 30px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .access-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -242,6 +267,12 @@
             <i class="fas fa-hourglass-start"></i> Обратный отсчёт до 22:00...
         </div>
         
+        <div id="accessButtonContainer" style="display: none;">
+            <a href="video.html" class="access-button pulse" id="accessButton">
+                <i class="fas fa-play-circle"></i> Перейти к видео
+            </a>
+        </div>
+        
         <div style="text-align: center; margin-top: 30px; color: #a0a0a0; font-size: 0.9rem;">
             <i class="fas fa-info-circle"></i> После наступления 22:00 доступ будет открыт навсегда
         </div>
@@ -251,7 +282,6 @@
         // Конфигурация
         const TARGET_HOUR = 22; // 22:00
         const TARGET_MINUTE = 0;
-        const VIDEO_URL = 'video.html';
         const ACCESS_KEY = 'permanentAccessGranted';
         let timerInterval = null;
         
@@ -263,6 +293,7 @@
         // Предоставить постоянный доступ
         function grantPermanentAccess() {
             localStorage.setItem(ACCESS_KEY, 'true');
+            localStorage.setItem('accessGranted', 'true');
         }
         
         // Функция для расчета времени до 22:00
@@ -386,7 +417,7 @@
             
             document.getElementById('statusMessage').className = "status-message ready";
             document.getElementById('statusMessage').innerHTML = 
-                '<i class="fas fa-check-circle"></i> Постоянный доступ открыт! <a href="' + VIDEO_URL + '" style="color: #10b981; text-decoration: underline; font-weight: bold;">Перейти к видео</a>';
+                '<i class="fas fa-check-circle"></i> Постоянный доступ открыт!';
             
             document.getElementById('hours').textContent = "00";
             document.getElementById('minutes').textContent = "00";
@@ -400,11 +431,9 @@
             
             // Обновляем контейнер таймера
             document.querySelector('.timer-container').classList.add('access-granted');
-        }
-        
-        // Перенаправление на видео
-        function redirectToVideo() {
-            window.location.href = VIDEO_URL;
+            
+            // Показываем кнопку доступа
+            document.getElementById('accessButtonContainer').style.display = 'block';
         }
         
         // Запускаем таймер при загрузке страницы
