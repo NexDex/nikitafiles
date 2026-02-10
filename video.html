@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Видео - Файлы Никита Н.А</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -35,22 +36,26 @@
         .video-container {
             flex: 1;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
         
         video {
-            max-width: 100%;
-            max-height: 80vh;
+            width: 100%;
+            max-width: 1200px;
+            max-height: 70vh;
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background-color: #000;
         }
         
         .controls {
             padding: 20px;
             text-align: center;
             background-color: #1a1a1a;
+            margin-top: 20px;
         }
         
         .back-btn {
@@ -64,6 +69,7 @@
             text-decoration: none;
             display: inline-block;
             transition: all 0.3s ease;
+            margin: 5px;
         }
         
         .back-btn:hover {
@@ -81,6 +87,31 @@
             max-width: 600px;
             text-align: center;
         }
+        
+        .video-info {
+            background-color: rgba(30, 30, 30, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .video-title {
+            color: #8b5cf6;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .error-message {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -90,23 +121,124 @@
     </div>
     
     <div class="message">
-        <i class="fas fa-check-circle"></i> Доступ предоставлен: сегодня в 22:00
+        <i class="fas fa-check-circle"></i> Доступ предоставлен! Таймер завершён.
     </div>
     
     <div class="video-container">
-        <video controls autoplay>
-            <!-- Замените src на URL вашего видео -->
-            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-            Ваш браузер не поддерживает видео тег.
+        <div class="video-info">
+            <div class="video-title">
+                <i class="fas fa-film"></i> Ваше эксклюзивное видео
+            </div>
+            <p>Видео загружается... Пожалуйста, подождите.</p>
+        </div>
+        
+        <video id="mainVideo" controls autoplay playsinline>
+            <!-- ИСПРАВЛЕНО: Используем ваш видеофайл your-video.mp4 -->
+            <source src="your-video.mp4" type="video/mp4">
+            <source src="your-video.webm" type="video/webm">
+            <source src="your-video.ogg" type="video/ogg">
+            Ваш браузер не поддерживает видео тег. 
+            <a href="your-video.mp4" download>Скачайте видео</a>
         </video>
+        
+        <div class="controls">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Вернуться к таймеру
+            </a>
+            <button onclick="resetAccess()" class="back-btn" style="background: #f59e0b;">
+                <i class="fas fa-redo"></i> Сбросить доступ
+            </button>
+            <button onclick="restartVideo()" class="back-btn" style="background: #10b981;">
+                <i class="fas fa-redo-alt"></i> Перезапустить видео
+            </button>
+        </div>
     </div>
-    
-    <div class="controls">
-        <a href="index.html" class="back-btn">
-            <i class="fas fa-arrow-left"></i> Вернуться к таймеру
-        </a>
-    </div>
-    
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+
+    <script>
+        const video = document.getElementById('mainVideo');
+        
+        // Обработчики событий для видео
+        video.addEventListener('loadeddata', function() {
+            console.log('Видео загружено успешно');
+            showMessage('Видео загружено и готово к воспроизведению', 'success');
+        });
+        
+        video.addEventListener('error', function(e) {
+            console.error('Ошибка загрузки видео:', video.error);
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Ошибка загрузки видео</h3>
+                <p>Файл your-video.mp4 не найден или не может быть воспроизведен.</p>
+                <p>Убедитесь, что файл video.mp4 находится в той же папке, что и эта страница.</p>
+                <p>Код ошибки: ${video.error ? video.error.code : 'неизвестно'}</p>
+                <button onclick="location.reload()" class="back-btn" style="background: #6366f1; margin-top: 10px;">
+                    <i class="fas fa-sync-alt"></i> Перезагрузить страницу
+                </button>
+            `;
+            
+            document.querySelector('.video-container').insertBefore(errorDiv, video);
+            showMessage('Ошибка загрузки видео. Проверьте консоль для подробностей.', 'error');
+        });
+        
+        video.addEventListener('ended', function() {
+            showMessage('Видео завершено', 'info');
+        });
+        
+        function showMessage(text, type) {
+            const messageDiv = document.querySelector('.message');
+            const icon = type === 'error' ? 'fa-exclamation-circle' : 
+                        type === 'info' ? 'fa-info-circle' : 'fa-check-circle';
+            const color = type === 'error' ? '#f87171' : 
+                         type === 'info' ? '#60a5fa' : '#10b981';
+            
+            messageDiv.innerHTML = `<i class="fas ${icon}"></i> ${text}`;
+            messageDiv.style.color = color;
+            messageDiv.style.borderColor = color + '30';
+            messageDiv.style.backgroundColor = color + '10';
+        }
+        
+        function resetAccess() {
+            localStorage.removeItem('accessGranted');
+            window.location.href = 'index.html';
+        }
+        
+        function restartVideo() {
+            video.currentTime = 0;
+            video.play();
+            showMessage('Видео перезапущено', 'info');
+        }
+        
+        // Проверяем, был ли предоставлен доступ
+        window.addEventListener('load', function() {
+            const accessGranted = localStorage.getItem('accessGranted');
+            
+            if (accessGranted !== 'true') {
+                // Если доступ не был предоставлен, перенаправляем на главную
+                setTimeout(function() {
+                    window.location.href = 'index.html';
+                }, 2000);
+                
+                const messageDiv = document.querySelector('.message');
+                messageDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Доступ не был предоставлен. Перенаправление на главную страницу...
+                `;
+                messageDiv.style.color = '#f59e0b';
+                messageDiv.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                messageDiv.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                
+                return;
+            }
+            
+            // Автоматическое воспроизведение видео
+            video.play().catch(function(error) {
+                console.log('Автовоспроизведение заблокировано:', error);
+                showMessage('Нажмите на видео для начала воспроизведения', 'info');
+            });
+        });
+    </script>
 </body>
 </html>
