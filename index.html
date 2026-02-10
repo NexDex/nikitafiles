@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Файлы Никита Н.А - Доступ в 22:00</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(28, 58, 173, 0.1) 0%, transparent 55%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 55%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: rgba(18, 18, 18, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .target-time {
+            background-color: rgba(99, 102, 241, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            text-align: center;
+        }
+
+        .target-time strong {
+            color: #8b5cf6;
+            font-size: 1.3rem;
+        }
+
+        .timer-container {
+            text-align: center;
+            padding: 40px;
+            margin: 30px 0;
+            background-color: rgba(10, 10, 10, 0.8);
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        #timer {
+            font-size: 4rem;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.7);
+            margin: 20px 0;
+            letter-spacing: 3px;
+        }
+
+        .timer-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .time-unit {
+            background-color: rgba(30, 30, 30, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .time-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #8b5cf6;
+        }
+
+        .time-label {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .current-time {
+            background-color: rgba(30, 30, 30, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            border-left: 4px solid #10b981;
+        }
+
+        .server-time {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #10b981;
+        }
+
+        .status-message {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .waiting {
+            background-color: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+
+        .ready {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            .timer-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            #timer {
+                font-size: 3rem;
+            }
+            
+            .time-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-lock"></i> Файлы Никита Н.А</h1>
+            <p class="subtitle">Эксклюзивный доступ к материалам откроется в указанное время</p>
+            
+            <div class="target-time">
+                <i class="fas fa-clock"></i> Время открытия доступа: <strong>22:00</strong> (по вашему времени)
+            </div>
+        </div>
+        
+        <div class="current-time">
+            <div>Текущее время:</div>
+            <div class="server-time" id="currentTime">--:--:--</div>
+        </div>
+        
+        <div class="timer-container">
+            <div id="timer">--:--:--</div>
+            <div class="timer-details">
+                <div class="time-unit">
+                    <div class="time-value" id="hours">00</div>
+                    <div class="time-label">Часов</div>
+                </div>
+                <div class="time-unit">
+                    <div class="time-value" id="minutes">00</div>
+                    <div class="time-label">Минут</div>
+                </div>
+                <div class="time-unit">
+                    <div class="time-value" id="seconds">00</div>
+                    <div class="time-label">Секунд</div>
+                </div>
+                <div class="time-unit">
+                    <div class="time-value" id="progress">0%</div>
+                    <div class="time-label">Прогресс</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-message waiting" id="statusMessage">
+            <i class="fas fa-hourglass-half"></i> Ожидайте времени открытия доступа...
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; color: #a0a0a0; font-size: 0.9rem;">
+            <i class="fas fa-info-circle"></i> После срабатывания таймера вы будете автоматически перенаправлены
+        </div>
+    </div>
+
+    <script>
+        // Конфигурация
+        const TARGET_HOUR = 22; // 22:00
+        const VIDEO_URL = 'video.html'; // Страница с видео
+        const ACCESS_KEY = 'accessGranted'; // Ключ для localStorage
+
+        // Проверяем, был ли уже доступ сегодня
+        function checkAlreadyAccessedToday() {
+            const today = new Date().toDateString();
+            const lastAccess = localStorage.getItem('lastAccessDate');
+            const alreadyAccessed = localStorage.getItem(ACCESS_KEY);
+            
+            return lastAccess === today && alreadyAccessed === 'true';
+        }
+
+        // Получаем целевое время (22:00 сегодня)
+        function getTargetTime() {
+            const now = new Date();
+            const target = new Date();
+            target.setHours(TARGET_HOUR, 0, 0, 0);
+            
+            // Если сейчас уже после 22:00, доступ уже должен быть открыт
+            if (now.getHours() >= TARGET_HOUR) {
+                // Проверяем, был ли доступ сегодня
+                if (checkAlreadyAccessedToday()) {
+                    // Перенаправляем сразу
+                    redirectToVideo();
+                }
+                return target; // Сегодняшнее 22:00 (уже прошло)
+            }
+            
+            return target; // Сегодняшнее 22:00 (в будущем)
+        }
+
+        let targetTime = getTargetTime();
+
+        function updateTimer() {
+            const now = new Date();
+            const timeLeft = targetTime - now;
+            
+            // Обновляем текущее время
+            document.getElementById('currentTime').textContent = 
+                now.toLocaleTimeString('ru-RU');
+            
+            // Проверяем, наступило ли время доступа
+            if (now.getHours() >= TARGET_HOUR && now >= targetTime) {
+                // Время пришло!
+                if (!checkAlreadyAccessedToday()) {
+                    // Первый раз сегодня - сохраняем и перенаправляем
+                    grantAccess();
+                } else {
+                    // Уже был доступ сегодня - показываем сообщение
+                    showAlreadyAccessedMessage();
+                }
+                return;
+            }
+            
+            // Рассчитываем оставшееся время
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            // Рассчитываем прогресс
+            const nowSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const targetSeconds = TARGET_HOUR * 3600;
+            const progress = Math.min(99, Math.floor((nowSeconds / targetSeconds) * 100));
+            
+            // Обновляем отображение
+            document.getElementById('timer').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            document.getElementById('progress').textContent = `${progress}%`;
+            
+            // Изменяем цвет при малом времени
+            if (hours === 0 && minutes < 10) {
+                document.getElementById('timer').style.color = '#f87171';
+                document.getElementById('timer').style.textShadow = '0 0 20px rgba(248, 113, 113, 0.7)';
+            }
+        }
+        
+        // Предоставить доступ
+        function grantAccess() {
+            const today = new Date().toDateString();
+            localStorage.setItem(ACCESS_KEY, 'true');
+            localStorage.setItem('lastAccessDate', today);
+            
+            document.getElementById('statusMessage').className = "status-message ready";
+            document.getElementById('statusMessage').innerHTML = 
+                '<i class="fas fa-check-circle"></i> Доступ открыт! Перенаправление...';
+            
+            // Перенаправление через 2 секунды
+            setTimeout(redirectToVideo, 2000);
+        }
+        
+        // Показать сообщение о уже предоставленном доступе
+        function showAlreadyAccessedMessage() {
+            document.getElementById('timer').textContent = "00:00:00";
+            document.getElementById('hours').textContent = "00";
+            document.getElementById('minutes').textContent = "00";
+            document.getElementById('seconds').textContent = "00";
+            document.getElementById('progress').textContent = "100%";
+            
+            document.getElementById('statusMessage').className = "status-message ready";
+            document.getElementById('statusMessage').innerHTML = 
+                '<i class="fas fa-check-circle"></i> Доступ уже был предоставлен сегодня. <a href="' + VIDEO_URL + '" style="color: #10b981; text-decoration: underline;">Перейти к видео</a>';
+        }
+        
+        // Перенаправление на видео
+        function redirectToVideo() {
+            window.location.href = VIDEO_URL;
+        }
+        
+        // Запускаем таймер
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    </script>
+</body>
+</html>
