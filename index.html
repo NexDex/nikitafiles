@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Файлы Никита Н.А - Доступ в 22:00</title>
+    <title>Файлы Никита Н.А - Доступ через 10 секунд</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -170,6 +170,21 @@
             animation: pulse 2s infinite;
         }
 
+        .countdown-animation {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes countdown-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .last-seconds {
+            animation: countdown-flash 0.5s infinite;
+            color: #f87171 !important;
+            text-shadow: 0 0 30px rgba(248, 113, 113, 0.9) !important;
+        }
+
         @media (max-width: 768px) {
             .timer-details {
                 grid-template-columns: repeat(2, 1fr);
@@ -189,10 +204,10 @@
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-lock"></i> Файлы Никита Н.А</h1>
-            <p class="subtitle">Эксклюзивный доступ к материалам откроется в указанное время</p>
+            <p class="subtitle">Эксклюзивный доступ к материалам откроется через:</p>
             
             <div class="target-time">
-                <i class="fas fa-clock"></i> Время открытия доступа: <strong>22:00</strong> (по вашему времени)
+                <i class="fas fa-clock"></i> Доступ откроется через: <strong>10 секунд</strong>
             </div>
         </div>
         
@@ -202,7 +217,7 @@
         </div>
         
         <div class="timer-container">
-            <div id="timer">--:--:--</div>
+            <div id="timer">00:00:10</div>
             <div class="timer-details">
                 <div class="time-unit">
                     <div class="time-value" id="hours">00</div>
@@ -213,7 +228,7 @@
                     <div class="time-label">Минут</div>
                 </div>
                 <div class="time-unit">
-                    <div class="time-value" id="seconds">00</div>
+                    <div class="time-value" id="seconds">10</div>
                     <div class="time-label">Секунд</div>
                 </div>
                 <div class="time-unit">
@@ -224,7 +239,7 @@
         </div>
         
         <div class="status-message waiting" id="statusMessage">
-            <i class="fas fa-hourglass-half"></i> Ожидайте времени открытия доступа...
+            <i class="fas fa-hourglass-start"></i> Обратный отсчёт: 10 секунд...
         </div>
         
         <div style="text-align: center; margin-top: 30px; color: #a0a0a0; font-size: 0.9rem;">
@@ -234,70 +249,54 @@
 
     <script>
         // Конфигурация
-        const TARGET_HOUR = 22; // 22:00
+        const TOTAL_SECONDS = 10; // Таймер на 10 секунд
         const VIDEO_URL = 'video.html'; // Страница с видео
         const ACCESS_KEY = 'accessGranted'; // Ключ для localStorage
+        let remainingSeconds = TOTAL_SECONDS;
+        let timerInterval = null;
+        let startTime = new Date().getTime();
 
-        // Проверяем, был ли уже доступ сегодня
-        function checkAlreadyAccessedToday() {
-            const today = new Date().toDateString();
-            const lastAccess = localStorage.getItem('lastAccessDate');
+        // Проверяем, был ли уже доступ
+        function checkAlreadyAccessed() {
             const alreadyAccessed = localStorage.getItem(ACCESS_KEY);
-            
-            return lastAccess === today && alreadyAccessed === 'true';
+            return alreadyAccessed === 'true';
         }
 
-        // Получаем целевое время (22:00 сегодня)
-        function getTargetTime() {
-            const now = new Date();
-            const target = new Date();
-            target.setHours(TARGET_HOUR, 0, 0, 0);
-            
-            // Если сейчас уже после 22:00, доступ уже должен быть открыт
-            if (now.getHours() >= TARGET_HOUR) {
-                // Проверяем, был ли доступ сегодня
-                if (checkAlreadyAccessedToday()) {
-                    // Перенаправляем сразу
-                    redirectToVideo();
-                }
-                return target; // Сегодняшнее 22:00 (уже прошло)
+        // Инициализация таймера
+        function initTimer() {
+            // Если доступ уже был предоставлен ранее
+            if (checkAlreadyAccessed()) {
+                showAlreadyAccessedMessage();
+                return;
             }
             
-            return target; // Сегодняшнее 22:00 (в будущем)
+            // Сброс значений
+            remainingSeconds = TOTAL_SECONDS;
+            startTime = new Date().getTime();
+            
+            // Запускаем таймер
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
         }
-
-        let targetTime = getTargetTime();
 
         function updateTimer() {
             const now = new Date();
-            const timeLeft = targetTime - now;
             
             // Обновляем текущее время
             document.getElementById('currentTime').textContent = 
                 now.toLocaleTimeString('ru-RU');
             
-            // Проверяем, наступило ли время доступа
-            if (now.getHours() >= TARGET_HOUR && now >= targetTime) {
-                // Время пришло!
-                if (!checkAlreadyAccessedToday()) {
-                    // Первый раз сегодня - сохраняем и перенаправляем
-                    grantAccess();
-                } else {
-                    // Уже был доступ сегодня - показываем сообщение
-                    showAlreadyAccessedMessage();
-                }
-                return;
-            }
+            // Рассчитываем прошедшее время
+            const elapsed = Math.floor((new Date().getTime() - startTime) / 1000);
+            remainingSeconds = Math.max(0, TOTAL_SECONDS - elapsed);
             
-            // Рассчитываем оставшееся время
-            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            // Форматируем время для отображения
+            const hours = Math.floor(remainingSeconds / 3600);
+            const minutes = Math.floor((remainingSeconds % 3600) / 60);
+            const seconds = remainingSeconds % 60;
             
             // Рассчитываем прогресс
-            const nowSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-            const targetSeconds = TARGET_HOUR * 3600;
-            const progress = Math.min(99, Math.floor((nowSeconds / targetSeconds) * 100));
+            const progress = Math.floor(((TOTAL_SECONDS - remainingSeconds) / TOTAL_SECONDS) * 100);
             
             // Обновляем отображение
             document.getElementById('timer').textContent = 
@@ -308,30 +307,56 @@
             document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
             document.getElementById('progress').textContent = `${progress}%`;
             
-            // Изменяем цвет при малом времени
-            if (hours === 0 && minutes < 10) {
-                document.getElementById('timer').style.color = '#f87171';
-                document.getElementById('timer').style.textShadow = '0 0 20px rgba(248, 113, 113, 0.7)';
+            // Меняем цвет при последних секундах
+            if (remainingSeconds <= 3) {
+                document.getElementById('timer').classList.add('last-seconds');
+                document.getElementById('seconds').style.color = '#f87171';
+                document.getElementById('statusMessage').innerHTML = 
+                    `<i class="fas fa-hourglass-end"></i> Почти готово! ${remainingSeconds}...`;
+            } else if (remainingSeconds <= 5) {
+                document.getElementById('timer').style.color = '#fbbf24';
+                document.getElementById('timer').style.textShadow = '0 0 20px rgba(251, 191, 36, 0.7)';
+                document.getElementById('seconds').style.color = '#fbbf24';
+            }
+            
+            // Проверяем, завершился ли таймер
+            if (remainingSeconds <= 0) {
+                clearInterval(timerInterval);
+                grantAccess();
             }
         }
         
         // Предоставить доступ
         function grantAccess() {
-            const today = new Date().toDateString();
+            // Сохраняем факт предоставления доступа
             localStorage.setItem(ACCESS_KEY, 'true');
-            localStorage.setItem('lastAccessDate', today);
+            
+            // Обновляем интерфейс
+            document.getElementById('timer').textContent = "00:00:00";
+            document.getElementById('timer').classList.remove('last-seconds');
+            document.getElementById('timer').style.color = '#10b981';
+            document.getElementById('timer').style.textShadow = '0 0 30px rgba(16, 185, 129, 0.7)';
             
             document.getElementById('statusMessage').className = "status-message ready";
             document.getElementById('statusMessage').innerHTML = 
                 '<i class="fas fa-check-circle"></i> Доступ открыт! Перенаправление...';
             
-            // Перенаправление через 2 секунды
-            setTimeout(redirectToVideo, 2000);
+            document.getElementById('hours').textContent = "00";
+            document.getElementById('minutes').textContent = "00";
+            document.getElementById('seconds').textContent = "00";
+            document.getElementById('progress').textContent = "100%";
+            document.getElementById('seconds').style.color = '#10b981';
+            
+            // Перенаправление через 1.5 секунды
+            setTimeout(redirectToVideo, 1500);
         }
         
         // Показать сообщение о уже предоставленном доступе
         function showAlreadyAccessedMessage() {
             document.getElementById('timer').textContent = "00:00:00";
+            document.getElementById('timer').style.color = '#10b981';
+            document.getElementById('timer').style.textShadow = '0 0 30px rgba(16, 185, 129, 0.7)';
+            
             document.getElementById('hours').textContent = "00";
             document.getElementById('minutes').textContent = "00";
             document.getElementById('seconds').textContent = "00";
@@ -339,7 +364,10 @@
             
             document.getElementById('statusMessage').className = "status-message ready";
             document.getElementById('statusMessage').innerHTML = 
-                '<i class="fas fa-check-circle"></i> Доступ уже был предоставлен сегодня. <a href="' + VIDEO_URL + '" style="color: #10b981; text-decoration: underline;">Перейти к видео</a>';
+                '<i class="fas fa-check-circle"></i> Доступ уже был предоставлен. <a href="' + VIDEO_URL + '" style="color: #10b981; text-decoration: underline;">Перейти к видео</a>';
+            
+            document.querySelector('.target-time').innerHTML = 
+                '<i class="fas fa-check-circle"></i> <strong>Доступ открыт!</strong>';
         }
         
         // Перенаправление на видео
@@ -347,9 +375,44 @@
             window.location.href = VIDEO_URL;
         }
         
-        // Запускаем таймер
-        updateTimer();
-        setInterval(updateTimer, 1000);
+        // Сброс доступа (для тестирования) - можно удалить в продакшене
+        function resetAccess() {
+            localStorage.removeItem(ACCESS_KEY);
+            location.reload();
+        }
+        
+        // Запускаем таймер при загрузке страницы
+        window.addEventListener('load', function() {
+            // Добавляем скрытую кнопку для сброса (для удобства тестирования)
+            const resetBtn = document.createElement('button');
+            resetBtn.innerHTML = '<i class="fas fa-redo"></i>';
+            resetBtn.style.position = 'fixed';
+            resetBtn.style.bottom = '20px';
+            resetBtn.style.right = '20px';
+            resetBtn.style.width = '40px';
+            resetBtn.style.height = '40px';
+            resetBtn.style.borderRadius = '50%';
+            resetBtn.style.background = 'rgba(99, 102, 241, 0.3)';
+            resetBtn.style.color = 'white';
+            resetBtn.style.border = 'none';
+            resetBtn.style.cursor = 'pointer';
+            resetBtn.style.fontSize = '16px';
+            resetBtn.style.zIndex = '1000';
+            resetBtn.style.opacity = '0.5';
+            resetBtn.title = 'Сбросить таймер (для теста)';
+            resetBtn.onclick = resetAccess;
+            document.body.appendChild(resetBtn);
+            
+            // Запускаем основной таймер
+            initTimer();
+            
+            // Обновляем текущее время каждую секунду
+            setInterval(function() {
+                const now = new Date();
+                document.getElementById('currentTime').textContent = 
+                    now.toLocaleTimeString('ru-RU');
+            }, 1000);
+        });
     </script>
 </body>
 </html>
